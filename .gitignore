@@ -1,0 +1,178 @@
+##############################################
+# .gitignore for ASP.NET Core Identity Framework
+# Stack: C#, ASP.NET Core, Entity Framework Core,
+#        JWT, SQL Server, Visual Studio / VS Code
+##############################################
+
+
+# ─── Build Output ────────────────────────────
+[Bb]in/
+[Oo]bj/
+out/
+build/
+publish/
+
+
+# ─── .NET / NuGet ────────────────────────────
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+.nuget/
+packages/
+*.nupkg
+*.snupkg
+*.nuspec
+nuget.config.local
+
+
+# ─── Visual Studio ───────────────────────────
+.vs/
+*.rsuser
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+
+# ─── VS Code ─────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+
+# ─── JetBrains Rider ─────────────────────────
+.idea/
+*.sln.iml
+
+
+# ─── ASP.NET Core Secrets & Config ───────────
+# Never commit secrets, connection strings, or keys
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+**/Properties/launchSettings.json
+*.pfx
+*.p12
+*.key
+*.pem
+*.env
+.env
+.env.*
+!.env.example
+
+
+# ─── Entity Framework Core Migrations (optional)
+# Uncomment the line below ONLY if you auto-generate
+# migrations in CI and don't want them tracked.
+# **/Migrations/
+
+
+# ─── SQL Server / LocalDB ────────────────────
+*.mdf
+*.ldf
+*.ndf
+
+
+# ─── JWT / Auth Secrets ──────────────────────
+# Extra guard — never commit signing keys
+jwtkey.txt
+*.rsa
+*.cer
+
+
+# ─── Docker ──────────────────────────────────
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+
+
+# ─── Test Results ────────────────────────────
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+
+# ─── Node / Frontend (if any) ────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.pnp
+.pnp.js
+
+
+# ─── OS Generated ────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+
+# ─── Logs ────────────────────────────────────
+logs/
+*.log
+nlog.config.local
+
+
+# ─── Rider / ReSharper ───────────────────────
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+
+# ─── Azure / Deployment ──────────────────────
+*.azurePubxml
+*.pubxml
+*.pubxml.user
+PublishProfiles/
+
+
+# ─── Misc ────────────────────────────────────
+*.bak
+*.cache
+*.orig
+*.rej
+*.swp
+*~
