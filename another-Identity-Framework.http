@@ -1,0 +1,6 @@
+@another_Identity_Framework_HostAddress = http://localhost:5041
+
+GET {{another_Identity_Framework_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
