@@ -32,3 +32,8 @@ D:\another-Identity-Framework\obj\Debug\net10.0\refint\another-Identity-Framewor
 D:\another-Identity-Framework\obj\Debug\net10.0\another-Identity-Framework.pdb
 D:\another-Identity-Framework\obj\Debug\net10.0\another-Identity-Framework.genruntimeconfig.cache
 D:\another-Identity-Framework\obj\Debug\net10.0\ref\another-Identity-Framework.dll
+D:\another-Identity-Framework\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+D:\another-Identity-Framework\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\another-Identity-Framework\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+D:\another-Identity-Framework\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+D:\another-Identity-Framework\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll

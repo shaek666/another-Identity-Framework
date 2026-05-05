@@ -1,11 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "s66wqIl+REU=",
+  "dgSpecHash": "sOO9IhnQP7o=",
   "success": true,
   "projectFilePath": "D:\\another-Identity-Framework\\another-Identity-Framework.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\shaek\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.3\\microsoft.aspnetcore.openapi.10.0.3.nupkg.sha512",
-    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.18.0\\microsoft.identitymodel.abstractions.8.18.0.nupkg.sha512",
+    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.identitymodel.jsonwebtokens\\8.18.0\\microsoft.identitymodel.jsonwebtokens.8.18.0.nupkg.sha512",
+    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.identitymodel.logging\\8.18.0\\microsoft.identitymodel.logging.8.18.0.nupkg.sha512",
+    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.18.0\\microsoft.identitymodel.tokens.8.18.0.nupkg.sha512",
+    "C:\\Users\\shaek\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512",
+    "C:\\Users\\shaek\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.18.0\\system.identitymodel.tokens.jwt.8.18.0.nupkg.sha512"
   ],
   "logs": []
 }
