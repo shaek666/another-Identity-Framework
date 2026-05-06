@@ -1,140 +1,163 @@
-    using System.Net;
-    using System.Security.Claims;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Cookies;
-    using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+// using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
-    var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-    // builder.Services
-    //     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    //     .AddCookie(options =>
-    //     {
-    //         options.Cookie.Name = "Friday";
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql("Host=localhost;Port=5432;Database=identity_db;Username=postgres;Password=password");
+});
 
-    //         options.Events.OnRedirectToLogin = context =>
-    //         {
-    //             context.Response.StatusCode = 401;
-    //             return Task.CompletedTask;
-    //         };
-    //     });
-
-
-    // builder.Services.AddAuthorization();
-
-
-    var app = builder.Build();
-
-    app.Use(async (context, next) =>
+builder.Services
+    .AddIdentity<IdentityUser, IdentityRole>(options =>
     {
-        if (context.Request.Path.StartsWithSegments("/login"))
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequiredLength = 1;
+        options.Password.RequiredUniqueChars = 0;
+
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+var key = "a-very-long-and-secure-secret-key-at-least-32-chars"u8.ToArray();
+
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            await next();
-            return;
-        }
-
-        var authCookie = context.Request.Headers.Cookie.FirstOrDefault(c => c.StartsWith(("friday")));
-
-        if (authCookie == null || authCookie.Length <= 0)
-        {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Unauthorized: No authentication cookie found.");
-            return;
-        }
-
-        var payload = authCookie.Split("=").Last();
-        var parts = payload.Split(":");
-        var key = parts[0];
-        var value = parts[1];
-
-        var claims = new List<Claim>
-        {
-            new(key, value)
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "another-Identity-Framework",
+            ValidAudience = "another-Identity-Framework",
+            IssuerSigningKey = new SymmetricSecurityKey("a-very-long-and-secure-secret-key-at-least-32-chars"u8.ToArray())
         };
-
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        context.User = new ClaimsPrincipal(claimsIdentity);
-        await next();
     });
 
-    // app.UseAuthentication();
-    // app.UseAuthorization();
-
-    // app.MapGet("/cookie-authorized", (HttpContext context) =>
-    // {
-    //     return Results.Ok("You're authenticated by Cookie"); // This ain't an authenticated route, like 
-    // }).RequireAuthorization();
-
-    // app.MapGet("/login", async (string userName, string password, HttpContext context) =>
-    // {
-    //     if (userName != "jackiechan" && password != "password") return Results.Unauthorized();
-
-    //     //Generating secrets if userName == jackiechan and password is password, assuming these will always be the username and password as we are hardcoding it.
-    //     var claims = new List<Claim>
-    //     {
-    //         new("username", userName),
-    //         new("movie", "rush-hour-3")
-    //     };
-    //     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    //     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-    //     await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
-    //     return Results.Ok();
-    // });
-
-    // app.MapGet("/logout", (string userName, string password, HttpContext context) =>
-    // {
-    //     if (userName != "jackiechan" && password != "password") return Results.Unauthorized();
-
-    //     var secret = $"username:{userName}";
-    //     context.Response.Headers["set-cookie"] = $"sunday= {secret}";
-    //     return Results.Ok();
-    // });
-
-    app.MapGet("/cookie-authorized", (HttpContext context) =>
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("admin-policy", policy =>
     {
-        var value = context.User.FindFirst("username");
-        return Results.Ok(value?.Value);
+        policy.RequireClaim("org", "ait");
+        policy.RequireRole("admin");
+        policy.RequireAuthenticatedUser();
     });
+});
 
-    app.MapGet("/login", async (string userName, string password, HttpContext context) =>
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapPost("/register", async (
+    string email, 
+    string password, 
+    UserManager<IdentityUser> userManager) =>
+{
+    var user = new IdentityUser
     {
-        if (userName != "jackiechan" || password != "password") return Results.Unauthorized();
-        var secret = $"username:{userName}";
-        context.Response.Headers["set-cookie"] = $"friday={secret}";
-        return Results.Ok("Login successful! Cookie has been set.");
-    });
+        UserName = email,
+        Email = email
+    };
+    var result = await userManager.CreateAsync(user, password);
 
-    app.Run();
+    if(!result.Succeeded) return Results.BadRequest("User creation failed");
 
-    public class AuthFactory
+    return Results.Ok("User Created");
+});
+
+app.MapGet("/login", async (
+    string email, 
+    string password, 
+    UserManager<IdentityUser> userManager) =>
+{
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) return Results.Unauthorized();
+
+    var user = await userManager.FindByEmailAsync(email);
+    if(user is null) return Results.Unauthorized();
+
+    var isPasswordValid = await userManager.CheckPasswordAsync(user, password);
+    if(!isPasswordValid) return Results.Unauthorized();
+
+    var organization = email switch
     {
-        public static async Task SignInAsync(string scheme)
-        {
-            if (scheme == "cookie") await new CookieAuthService().SignInAsync();
-            if (scheme == "bearer") await new BearerAuthService().SignInAsync();
-        }
-    }
+        var e when e.EndsWith("@ait.com") => "ait",
+        var e when e.EndsWith("@optimizely.com") => "optimizely",
+        var e when e.EndsWith("@fieldnation.com") => "fieldnation",
+    };
 
-    public interface IAuthService
+    var role = email switch
     {
-        public Task SignInAsync();
-    }
+        var e when e.EndsWith("rick@ait.com") => "admin",
+        _ => "user"
+    };
 
-    public class CookieAuthService : IAuthService
+    var tokenDescriptor = new SecurityTokenDescriptor
     {
-        public Task SignInAsync()
-        {
-            Console.WriteLine("Executing Strategy: Sign in with Cookie");
-            return Task.CompletedTask;
-        }
-    }
+       Subject = new ClaimsIdentity([
+           new Claim(JwtRegisteredClaimNames.Email, email),
+           new Claim("org", organization),
+           new Claim(ClaimTypes.Role, role),
+       ]),
+       Expires = DateTime.UtcNow.AddMinutes(30),
+       Issuer = "another-Identity-Framework",
+       Audience = "another-Identity-Framework",
+       SigningCredentials = new SigningCredentials(
+           new SymmetricSecurityKey(key),
+           SecurityAlgorithms.HmacSha256Signature
+       )
+    };
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var token = tokenHandler.CreateToken(tokenDescriptor);
+    var jwtToken = tokenHandler.WriteToken(token);
+    return Results.Ok(new { token = jwtToken });
+});
 
-    public class BearerAuthService : IAuthService
-    {
-        public Task SignInAsync()
-        {
-            Console.WriteLine("Executing Strategy: Sign in with Bearer Token");
-            return Task.CompletedTask;
-        }
-    }
+app.MapGet("/ait-resources", (HttpContext context) =>
+{
+    return Results.Ok("You accessed AIT resources");
+}).RequireAuthorization(policy =>
+{
+    policy.RequireClaim("org", "ait");
+    policy.RequireAuthenticatedUser();
+});
+
+app.MapGet("/ait-admin-resources", (HttpContext context) =>
+{
+    return Results.Ok("You accessed AIT admin resources");
+}).RequireAuthorization("admin-policy");
+
+
+
+app.MapGet("/optimizely-resources", () =>
+{
+    return Results.Ok("You accessed Optimizely resources");
+}).RequireAuthorization(policy =>
+{
+    policy.RequireClaim("org", "optimizely");
+    policy.RequireAuthenticatedUser();
+});;
+
+app.MapGet("/fieldnation-resources", () =>
+{
+    return Results.Ok("You accessed Filed Nation resources");
+}).RequireAuthorization(policy =>
+{
+    policy.RequireClaim("org", "fieldnation");
+    policy.RequireAuthenticatedUser();
+});;
+
+app.Run();
